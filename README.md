@@ -11,8 +11,7 @@ A static blog site generator, written in Python. Write your weblog entries direc
 
 2. 下载realsimpleblog，点击如下连接：[下载zip包](https://github.com/laszo/realsimpleblog/archive/master.zip)，并解压。
 
-3. 开始写博客。在content目录下，新建markdown类型的文件，使用你喜欢的编辑器写吧。如果你不熟悉markdown，可以参看[Markdown 语法说明 (简体中文版)](http://wowubuntu.com/markdown/)，或。[作业部落](https://www.zybuluo.com)提供了在线的markdown编辑器。我向你保证，markdown标记是最最简单易学的，花几分钟时间学会以后，物超所值。
-如果你暂时不想写新文章，可以跳到第四步，因为content文件夹中已经附带了一篇“helloworld.markdown”。让你的新博客内容不会为空。
+3. 开始写博客。在content目录下，新建markdown类型的文件，使用你喜欢的编辑器写吧，文件格式可以参考content目录下的“helloworld.markdown”文件。如果你暂时不想写新文章，可以跳到第四步。
 
 4. 修改博客标题。打开main.py文件，修改的第14行：
 ```
