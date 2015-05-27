@@ -18,17 +18,14 @@ A static blog site generator, written in Python. Write your weblog entries direc
 blogtitle = u'This is the realSimpleBlog.'
 ```
 把 This is the realSimpleBlog. 改为你想要的标题。
-
 4. 打开命令行终端，进入realsimpleblog目录，输入
 ```
 python main.py
 ```
 我们看到，一个新的静态站点已经生成了。可以打开目录中的index.html 查看博客的首页。
-
 5. 启动本地http服务器，可以在本地预览站点。输入：
 ```
 python -m Httpserver
 ```
 然后打开：[http://127.0.0.1:8000/](http://127.0.0.1:8000/) 就可以看到你的博客。
-
 6. 发布站点。你可以把站点发布到[GitHubPages](https://pages.github.com/)上面，或者其他任何可以托管静态页面的网站上。
