@@ -11,7 +11,7 @@ postTemplatePath = 'template/post.html'
 indexTemplatePath = 'template/index.html'
 outpath = 'output/'
 contentpath = 'content/'
-blogtitle = u'This is a real simple blog.'
+blogtitle = u'This is the realSimpleBlog.'
 
 
 def createPost(post):
