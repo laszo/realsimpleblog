@@ -13,19 +13,10 @@ A static blog site generator, written in Python. Write your weblog entries direc
 
 3. 开始写博客。在content目录下，新建markdown类型的文件，使用你喜欢的编辑器写吧，文件格式可以参考content目录下的“helloworld.markdown”文件。如果你暂时不想写新文章，可以跳到第四步。
 
-4. 修改博客标题。打开main.py文件，修改的第14行：
-```
-blogtitle = u'This is the realSimpleBlog.'
-```
-把 This is the realSimpleBlog. 改为你想要的标题。
-4. 打开命令行终端，进入realsimpleblog目录，输入
-```
-python main.py
-```
-我们看到，一个新的静态站点已经生成了。可以打开目录中的index.html 查看博客的首页。
-5. 启动本地http服务器，可以在本地预览站点。输入：
-```
-python -m Httpserver
-```
-然后打开：[http://127.0.0.1:8000/](http://127.0.0.1:8000/) 就可以看到你的博客。
-6. 发布站点。你可以把站点发布到[GitHubPages](https://pages.github.com/)上面，或者其他任何可以托管静态页面的网站上。
+4. 修改博客标题。打开main.py文件，修改的第14行，把 This is the realSimpleBlog. 改为你想要的标题。
+
+5. 打开命令行终端，进入realsimpleblog目录，输入 ‘python main.py’ 我们看到，一个新的静态站点已经生成了。可以打开目录中的index.html 查看博客的首页。
+
+6. 启动本地http服务器，可以在本地预览站点。输入：‘python -m Httpserver’。 然后打开：http://127.0.0.1:8000/ 就可以看到你的博客。
+
+7. 发布站点。你可以把站点发布到[GitHubPages](https://pages.github.com/)上面，或者其他任何可以托管静态页面的网站上。
