@@ -8,15 +8,17 @@ import markdown
 from jinja2 import Template
 
 postTemplatePath = 'template/post.html'
+pageTemplatePath = 'template/page.html'
 indexTemplatePath = 'template/index.html'
 outpath = 'output/'
 contentpath = 'content/'
+pagespath = 'content/pages/'
 blogtitle = u'This is the realSimpleBlog.'
 
 
 def createPost(post):
     text = codecs.open(contentpath + post, 'r', encoding='utf8').read()
-    mkdtxt, title = readPostConfig(text)
+    mkdtxt, title = readConfig(text)
     content = markdown.markdown(mkdtxt)
     t = codecs.open(postTemplatePath, 'r', encoding='utf8').read()
     html = Template(t).render(content=content, title=title, blogtitle=blogtitle)
@@ -27,7 +29,20 @@ def createPost(post):
     return outfile, title
 
 
-def readPostConfig(text):
+def createPage(page, pagelinks):
+    text = codecs.open(pagespath + page, 'r', encoding='utf8').read()
+    mkdtxt, title = readConfig(text)
+    content = markdown.markdown(mkdtxt)
+    t = codecs.open(pageTemplatePath, 'r', encoding='utf8').read()
+    html = Template(t).render(content=content, title=title, blogtitle=blogtitle, pagelinks=pagelinks)
+
+    outfile = os.path.splitext(page)[0] + '.html'
+    output_file = codecs.open(outfile, "w", encoding="utf-8", errors="xmlcharrefreplace")
+    output_file.write(html)
+    return outfile, title
+
+
+def readConfig(text):
     get_header = re.compile(r'---[\s\S]*?---')
     header = get_header.findall(text)[0]
     content = text.replace(header, '', 1)
@@ -40,9 +55,9 @@ def readPostConfig(text):
     return content, title
 
 
-def createIndex(links):
+def createIndex(postlinks, pagelinks):
     t = codecs.open(indexTemplatePath, 'r', encoding='utf8').read()
-    html = Template(t).render(links=links, title=blogtitle)
+    html = Template(t).render(postlinks=postlinks, pagelinks=pagelinks, title=blogtitle)
 
     outfile = 'index.html'
     output_file = codecs.open(outfile, "w", encoding="utf-8", errors="xmlcharrefreplace")
@@ -52,11 +67,24 @@ def createIndex(links):
 def main():
     posts = os.listdir(contentpath)
     posts.reverse()
-    links = []
+    postlinks = []
     for p in posts:
-        url, title = createPost(p)
-        links.append({'title':title, 'url':url})
-    createIndex(links)
+        if os.path.isfile(contentpath+p):
+            url, title = createPost(p)
+            postlinks.append({'title':title, 'url':url})
+    pagefiles = os.listdir(pagespath)
+    temp_links = []
+    for p in pagefiles:
+        text = codecs.open(pagespath + p, 'r', encoding='utf8').read()
+        mkdtxt, title = readConfig(text)
+        outfile = os.path.splitext(p)[0] + '.html'
+        temp_links.append({'title':title, 'url':url})
+    pagelinks = []
+    for p in pagefiles:
+        url, title = createPage(p, temp_links)
+        pagelinks.append({'title':title, 'url':url})
+
+    createIndex(postlinks, pagelinks)
 
 
 if __name__ == '__main__':
