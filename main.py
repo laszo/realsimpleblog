@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-__author__ = 'laszo'
+import codecs
+import ConfigParser
 import os
 import re
-import yaml
-import codecs
-import markdown
+
 import jinja2
-import ConfigParser
+import markdown
+import yaml
 
 config = ConfigParser.RawConfigParser()
 config.read('config')
@@ -18,22 +17,6 @@ def get_files(top, ext):
             if fn.endswith(ext):
                 yield os.path.join(dirpath, fn)
 
-def foo():
-    post_path = config.get('Main', 'post_path')
-    page_path = config.get('Main', 'page_path')
-    ext = config.get('Main', 'file_extention')
-    post_template = read_file_content(config.get('Template', 'post'))
-    page_template = read_file_content(config.get('Template', 'page'))
-
-    posts = get_files(post_path, ext)
-    pages = get_files(page_path, ext)
-
-    for po in posts:
-        mkdtxt, title = readConfig(read_file_content(po))
-        html = render(post_template, mkdtxt, title=title)
-        outfile = po.replace(ext, '.html')
-        write_to_file(html, outfile)
-
 def read_file_content(file_path):
     stream = codecs.open(file_path, 'r', encoding='utf8')
     return stream.read()
@@ -43,6 +26,7 @@ def write_to_file(content, file_path):
     stream.write(content)
 
 def render(template, mkdtxt, **kwargs):
+    kwargs['blog_title'] = blog_title
     kwargs['content'] = markdown.markdown(mkdtxt)
     html = jinja2.Template(template).render(kwargs)
     return html
@@ -59,67 +43,51 @@ def readConfig(text):
             title = post_info[item]
     return content, title
 
-def createPost(post):
-    text = codecs.open(contentpath + post, 'r', encoding='utf8').read()
-    mkdtxt, title = readConfig(text)
-    content = markdown.markdown(mkdtxt)
-    t = codecs.open(postTemplatePath, 'r', encoding='utf8').read()
-    html = Template(t).render(content=content, title=title, blogtitle=blogtitle)
 
-    outfile = outpath + os.path.splitext(post)[0] + '.html'
-    output_file = codecs.open(outfile, "w", encoding="utf-8", errors="xmlcharrefreplace")
-    output_file.write(html)
-    return outfile, title
+def get_out_file_path(in_file_path, out_path, ext):
+    out_file_name = in_file_path.split('/')[-1].replace(ext, '.html')
+    out_file_path = os.path.join(out_path, out_file_name)
+    return out_file_path
 
+def process(item_diretory, out_path, item_template, ext):
+    if not os.path.exists(out_path) and out_path:
+        os.mkdir(out_path)
 
-def createPage(page, pagelinks):
-    text = codecs.open(pagespath + page, 'r', encoding='utf8').read()
-    mkdtxt, title = readConfig(text)
-    content = markdown.markdown(mkdtxt)
-    t = codecs.open(pageTemplatePath, 'r', encoding='utf8').read()
-    html = Template(t).render(content=content, title=title, blogtitle=blogtitle, pagelinks=pagelinks)
+    items = get_files(item_diretory, ext)
+    for i in items:
+        mkdtxt, title = readConfig(read_file_content(i))
+        html = render(item_template, mkdtxt, title=title)
+        out_file_path = get_out_file_path(i, out_path, ext)
+        write_to_file(html, out_file_path)
+        yield title, out_file_path
 
-    outfile = os.path.splitext(page)[0] + '.html'
-    output_file = codecs.open(outfile, "w", encoding="utf-8", errors="xmlcharrefreplace")
-    output_file.write(html)
-    return outfile, title
-
-
-
-
-def createIndex(postlinks, pagelinks):
-    t = codecs.open(indexTemplatePath, 'r', encoding='utf8').read()
-    html = Template(t).render(postlinks=postlinks, pagelinks=pagelinks, title=blogtitle)
-
-    outfile = 'index.html'
-    output_file = codecs.open(outfile, "w", encoding="utf-8", errors="xmlcharrefreplace")
-    output_file.write(html)
-
+def make_index(posts, pages):
+    index_template = read_file_content(config.get('Template', 'index'))
+    html = render(index_template, '', postlinks=posts, pagelinks=pages)
+    write_to_file(html, 'index.html')
 
 def main():
-    posts = os.listdir(contentpath)
-    posts.reverse()
-    postlinks = []
-    for p in posts:
-        if os.path.isfile(contentpath+p):
-            url, title = createPost(p)
-            postlinks.append({'title':title, 'url':url})
-    pagefiles = os.listdir(pagespath)
-    temp_links = []
-    for p in pagefiles:
-        text = codecs.open(pagespath + p, 'r', encoding='utf8').read()
-        mkdtxt, title = readConfig(text)
-        outfile = os.path.splitext(p)[0] + '.html'
-        temp_links.append({'title':title, 'url':url})
-    pagelinks = []
-    for p in pagefiles:
-        url, title = createPage(p, temp_links)
-        pagelinks.append({'title':title, 'url':url})
+    post_path = config.get('Main', 'post_path')
+    page_path = config.get('Main', 'page_path')
+    post_output_path = config.get('Main', 'post_output_path')
+    page_output_path = config.get('Main', 'page_output_path')
 
-    createIndex(postlinks, pagelinks)
+    ext = config.get('Main', 'file_extention')
 
+    post_template = read_file_content(config.get('Template', 'post'))
+    page_template = read_file_content(config.get('Template', 'page'))
+
+    posts = list()
+    for post in process(post_path, post_output_path, post_template, ext):
+        posts.append(post)
+
+    pages = list()
+    for page in process(page_path, page_output_path, page_template, ext):
+        pages.append(page)
+
+    # pages.append(('Blog', 'index.html'))
+    make_index(posts, pages)
 
 if __name__ == '__main__':
-    # main()
-    # set_default_config()
-    read_config('config')
+    main()
+
