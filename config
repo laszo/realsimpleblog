@@ -1,0 +1,13 @@
+[Main]
+blog_title = This is the realSimpleBlog
+page_path = content/pages/
+post_path = content/posts/
+post_output_path = static/posts/
+page_output_path = 
+file_extention = .md
+
+[Template]
+post = template/post.html
+page = template/page.html
+index = template/index.html
+

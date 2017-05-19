@@ -5,16 +5,59 @@ import re
 import yaml
 import codecs
 import markdown
-from jinja2 import Template
+import jinja2
+import ConfigParser
 
-postTemplatePath = 'template/post.html'
-pageTemplatePath = 'template/page.html'
-indexTemplatePath = 'template/index.html'
-outpath = 'output/'
-contentpath = 'content/'
-pagespath = 'content/pages/'
-blogtitle = u'This is the realSimpleBlog'
+config = ConfigParser.RawConfigParser()
+config.read('config')
+blog_title = config.get('Main', 'blog_title')
 
+def get_files(top, ext):
+    for dirpath, dirnames, filenames in os.walk(top):
+        for fn in filenames:
+            if fn.endswith(ext):
+                yield os.path.join(dirpath, fn)
+
+def foo():
+    post_path = config.get('Main', 'post_path')
+    page_path = config.get('Main', 'page_path')
+    ext = config.get('Main', 'file_extention')
+    post_template = read_file_content(config.get('Template', 'post'))
+    page_template = read_file_content(config.get('Template', 'page'))
+
+    posts = get_files(post_path, ext)
+    pages = get_files(page_path, ext)
+
+    for po in posts:
+        mkdtxt, title = readConfig(read_file_content(po))
+        html = render(post_template, mkdtxt, title=title)
+        outfile = po.replace(ext, '.html')
+        write_to_file(html, outfile)
+
+def read_file_content(file_path):
+    stream = codecs.open(file_path, 'r', encoding='utf8')
+    return stream.read()
+
+def write_to_file(content, file_path):
+    stream = codecs.open(file_path, "w", encoding="utf-8", errors="xmlcharrefreplace")
+    stream.write(content)
+
+def render(template, mkdtxt, **kwargs):
+    kwargs['content'] = markdown.markdown(mkdtxt)
+    html = jinja2.Template(template).render(kwargs)
+    return html
+
+def readConfig(text):
+    get_header = re.compile(r'---[\s\S]*?---')
+    header = get_header.findall(text)[0]
+    content = text.replace(header, '', 1)
+    header = header.replace('---', '')
+    post_info = yaml.load(header)
+    title = ''
+    for item in post_info:
+        if item.upper() == 'title'.upper():
+            title = post_info[item]
+    return content, title
 
 def createPost(post):
     text = codecs.open(contentpath + post, 'r', encoding='utf8').read()
@@ -42,17 +85,6 @@ def createPage(page, pagelinks):
     return outfile, title
 
 
-def readConfig(text):
-    get_header = re.compile(r'---[\s\S]*?---')
-    header = get_header.findall(text)[0]
-    content = text.replace(header, '', 1)
-    header = header.replace('---', '')
-    post_info = yaml.load(header)
-    title = ''
-    for item in post_info:
-        if item.upper() == 'title'.upper():
-            title = post_info[item]
-    return content, title
 
 
 def createIndex(postlinks, pagelinks):
@@ -88,4 +120,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    # set_default_config()
+    read_config('config')

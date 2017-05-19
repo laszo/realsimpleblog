@@ -1,0 +1,6 @@
+.flex{
+  padding: 0;
+}
+.flex li{
+  display:inline-block;
+}
